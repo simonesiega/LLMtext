@@ -1,0 +1,19 @@
+# Core deep learning
+torch==2.4.0
+torchvision==0.19.0
+torchaudio==2.4.0
+
+# NLP and models
+transformers==4.57.0
+datasets==4.3.0
+sentencepiece==0.2.1
+
+# Utility
+tqdm==4.67.1
+numpy==2.3.3
+matplotlib==3.10.7
+
+# Debug and log
+jupyter==1.1.1
+rich==14.2.0
+wandb==0.22.3
