@@ -3,13 +3,13 @@ from torch.utils.data import Dataset
 
 class CharDataset(Dataset):
     """
-    Dataset per LLM su caratteri (Char-Level Language Model).
+    Character-level Language Modeling Dataset.
 
-    Ogni esempio consiste in:
-    - x: sequenza di token di lunghezza block_size
-    - y: stessa sequenza shiftata di 1 token (target successivo)
-    
-    Il modello impara a prevedere il prossimo carattere dato il contesto.
+    Each training example consists of:
+    - x: a sequence of `block_size` tokens (input)
+    - y: the same sequence shifted by one token (target)
+
+    The model learns to predict the next character given the previous context.
     """
 
     def __init__(self, text: str, block_size: int = 128):
@@ -17,53 +17,76 @@ class CharDataset(Dataset):
         Parameters
         ----------
         text : str
-            Il testo da cui costruire il dataset.
+            The text corpus used to build the dataset.
         block_size : int
-            Numero di caratteri in ogni sequenza di input.
+            Number of characters in each input sequence.
         """
 
-        # Lista dei caratteri unici presenti nel dataset
+        # Unique characters appearing in the text
         chars = sorted(list(set(text)))
         self.vocab_size = len(chars)
         
-        # stoi = "string to index": converte ogni carattere in un ID numerico
+        # stoi = "string to index": maps each character to a unique integer ID
         self.stoi = {ch: i for i, ch in enumerate(chars)}
         
-        # itos = "index to string": mappa inversa per decodificare token in caratteri
+        # itos = "index to string": inverse mapping for decoding
         self.itos = {i: ch for ch, i in self.stoi.items()}
         
-        # Lunghezza delle sequenze di input
+        # Sequence length for each input sample
         self.block_size = block_size
 
-        # Ogni carattere del testo diventa il suo ID numerico
-        # Tipo torch.long perché rappresentano interi
+        # Convert the entire text into a sequence of integer token IDs
         self.data = torch.tensor([self.stoi[c] for c in text], dtype=torch.long)
 
-    def __len__(self) -> int:
+    def __len_sliding__(self) -> int:
         """
-        Numero di sequenze presenti nel dataset.
+        Compute the number of training samples using a sliding window.
 
-        Ogni sequenza é composta da block_size token
+        Each input sequence is a window of size `block_size`
+        that moves by one character at a time over the text.
+
+        Returns
+        -------
+        int
+            Total number of overlapping training samples.
         """
         return len(self.data) - self.block_size
 
+    def __len_chunked__(self) -> int:
+        """
+        Compute the number of training samples using non-overlapping chunks.
+
+        The text is divided into consecutive, independent segments
+        of size `block_size`.
+
+        Returns
+        -------
+        int
+            Total number of disjoint chunks in the dataset.
+        """
+        return len(self.data) // self.block_size
+
     def __getitem__(self, idx: int):
         """
-        Restituisce una coppia (x, y).
+        Retrieve a pair (x, y) for training.
 
-        x : torch.Tensor
-            Sequenza di token di lunghezza block_size.
-        y : torch.Tensor
-            Sequenza target di lunghezza block_size,
-            shiftata di 1 posizione a destra.
+        Parameters
+        ----------
+        idx : int
+            Starting index of the sequence.
 
-        Questo permette al modello di prevedere il prossimo token
-        dato il contesto precedente.
+        Returns
+        -------
+        (x, y) : Tuple[torch.Tensor, torch.Tensor]
+            - x: sequence of length `block_size`
+            - y: same sequence shifted by one position
+
+        The target y represents the next character for each token in x.
         """
-        # x = sequenza di input
+        # Input sequence
         x = self.data[idx:idx + self.block_size]
         
-        # y = sequenza target, shiftata di 1
+        # Target sequence (shifted by one position)
         y = self.data[idx + 1:idx + self.block_size + 1]
         
         return x, y
