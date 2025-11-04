@@ -1,1 +1,13 @@
-/data
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+env/
+venv/
+
+# Data directories
+/data/
+
+# Test outputs
+/test/
