@@ -29,3 +29,6 @@ target/
 dist/
 build/
 *.egg-info/
+
+#TODO LIST
+todo.txt
