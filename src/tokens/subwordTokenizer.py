@@ -101,8 +101,8 @@ class SubwordTokenizer:
                 if word: 
 
                     # Split each word into characters and rejoin with spaces
-                    # e.g. "lower" → "l o w e r ▁"
-                    word = " ".join(list(word)) + " ▁"
+                    # e.g. "lower" → "▁ l o w e r"
+                    word = "▁ " + " ".join(list(word))
 
                     # Add this word (symbol sequence) to the corpus with its frequency
                     corpus[word.strip()] += 1

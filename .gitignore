@@ -5,9 +5,27 @@ __pycache__/
 # Virtual environments
 env/
 venv/
+*.env
 
 # Data directories
 /data/
 
 # Test outputs
 /test/
+
+# Rust/Cargo build files
+target/
+**/*.rs.bk
+
+# Maturin/PyO3 build artifacts
+*.pyd
+*.dll
+*.lib
+*.exp
+*.so
+*.dylib
+
+# Python wheel/dist
+dist/
+build/
+*.egg-info/
