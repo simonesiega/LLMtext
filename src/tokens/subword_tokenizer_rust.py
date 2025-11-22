@@ -30,8 +30,33 @@ class SubwordTokenizerRust:
         Rust side: accesses `SubwordTokenizer.merges` (Vec<(String, String)>)
         """
         return self._rust_tok.merges
+    
+    @property
+    def token_to_id(self):
+        """
+        Returns dict: token -> id (int)
 
-    def train(self, texts, vocab_size=100):
+        Rust side: SubwordTokenizer.token_to_id.
+        """
+        return self._rust_tok.token_to_id
+    
+    @property
+    def id_to_token(self):
+        """
+        Returns List[str] where index is token id.
+
+        Rust side: SubwordTokenizer.id_to_token getter.
+        """
+        return self._rust_tok.id_to_token
+    
+    @property
+    def special_tokens(self):
+        """Return special tokens configured inside Rust."""
+        return self._rust_tok.special_tokens
+    
+    # ---------------------------
+
+    def train(self, texts, max_merges=100, min_freq_token=3):
         """
         Train the tokenizer on a list of input texts.
 
@@ -39,14 +64,16 @@ class SubwordTokenizerRust:
         ----------
         texts : list of str
             Input sentences or documents to train on.
-        vocab_size : int
-            Maximum number of merges to perform (controls vocabulary size).
+        max_merges : int
+            Maximum number of merges to perform.
 
         Rust side: calls `SubwordTokenizer::train()`
         """
         # Ensure all inputs are strings
         texts = [str(t) for t in texts]
-        self._rust_tok.train(texts, vocab_size)
+        self._rust_tok.train(texts, max_merges, min_freq_token)
+    
+    # ---------------------------
 
     def encode(self, text):
         """
@@ -66,6 +93,14 @@ class SubwordTokenizerRust:
         """
         return self._rust_tok.encode(str(text))
 
+    def encode_ids(self, text):
+        """
+        Encode a text into a list of token IDs.
+
+        Rust: SubwordTokenizer.encode_ids
+        """
+        return self._rust_tok.encode_ids(str(text))
+
     def decode(self, tokens):
         """
         Reconstruct text from a list of subword tokens.
@@ -83,3 +118,33 @@ class SubwordTokenizerRust:
         Rust side: calls `SubwordTokenizer::decode()`
         """
         return self._rust_tok.decode(list(tokens))
+
+    def decode_from_ids(self, ids):
+        """
+        Decode a list of token IDs into a text.
+
+        Rust: SubwordTokenizer.decode_from_ids
+        """
+        ids = [int(i) for i in ids]
+        return self._rust_tok.decode_from_ids(ids)
+    
+    # ---------------------------
+
+    def save(self, path):
+        """
+        Save tokenizer state (vocab, merges, special tokens) to JSON file.
+
+        Rust: SubwordTokenizer.save_to_file
+        """
+        return self._rust_tok.save_to_file(str(path))
+
+    @staticmethod
+    def load(path):
+        """
+        Load tokenizer from a JSON file and return a new wrapper instance.
+
+        Rust: SubwordTokenizer.load_from_file
+        """
+        wrapper = SubwordTokenizerRust.__new__(SubwordTokenizerRust)
+        wrapper._rust_tok = SubwordTokenizer.load_from_file(str(path))
+        return wrapper
