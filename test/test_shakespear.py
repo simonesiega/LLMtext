@@ -2,6 +2,7 @@ import sys
 import time
 import os
 
+# Add src to Python path
 base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))  
 sys.path.append(os.path.join(base_dir, "src"))
 
@@ -26,8 +27,8 @@ def main():
     tok = SubwordTokenizerRust()
 
     # Set training parameters 
-    vocab_size = 15000  # maximum number of merges/tokens
-    min_freq = 2        # minimum frequency to consider a merge
+    vocab_size = 15000 # maximum number of merges/tokens
+    min_freq = 2 # minimum frequency to consider a merge
 
     # Train the tokenizer 
     start_time = time.time()
