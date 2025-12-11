@@ -11,7 +11,7 @@ sys.path.append(os.path.join(base_dir, "src"))
 from tokens.subword_tokenizer_rust import SubwordTokenizerRust
 
 # Import configuration module
-from config import TOKENIZER_JSON_PATH, TRAIN_BIN, VAL_BIN
+from config import Path
 
 # Number of tokens to display for verification
 N = 50  
@@ -75,12 +75,12 @@ def main():
     Main function to preprocess the dataset for LLM training.
     """
     # Load tokenizer
-    tok = SubwordTokenizerRust.load(TOKENIZER_JSON_PATH)
+    tok = SubwordTokenizerRust.load(Path.TOKENIZER_JSON_PATH)
     print(f"Loaded tokenizer with vocab size: {len(tok.id_to_token)}")
 
     # Load train and validation datasets
-    train_ids = load_bin(TRAIN_BIN)
-    val_ids = load_bin(VAL_BIN)
+    train_ids = load_bin(Path.TRAIN_BIN)
+    val_ids = load_bin(Path.VAL_BIN)
 
     print(f"Train tokens: {len(train_ids)}")
     print(f"Val   tokens: {len(val_ids)}")

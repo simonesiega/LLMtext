@@ -12,15 +12,7 @@ sys.path.append(os.path.join(base_dir, "src"))
 from tokens.subword_tokenizer_rust import SubwordTokenizerRust
 
 # Import configuration module
-from config import (
-    RAW_DATA_PATH, # Path to raw text file
-    TOKENIZER_JSON_PATH,  # Path to saved tokenizer JSON
-    PROCESSED_DIR, # Directory to save processed data
-    TRAIN_BIN, # Path to save train token IDs binary
-    VAL_BIN, # Path to save validation token IDs binary
-    META_PATH, # Path to save metadata (vocab etc.)
-    TRAIN_SPLIT # Fraction of data to use as training set
-)
+from config import Path, DatasetConfig
 
 
 def read_text(path):
@@ -50,16 +42,16 @@ def main():
 
 
     # 1: Load raw text
-    print(f"1 Loading raw text from: {RAW_DATA_PATH}")
+    print(f"1 Loading raw text from: {Path.RAW_DATA_PATH}")
     t0 = time.time()
-    text = read_text(RAW_DATA_PATH)
+    text = read_text(Path.RAW_DATA_PATH)
     t1 = time.time()
     print(f"Done in {t1 - t0:.2f} seconds. Total characters read: {len(text):,}")
 
     # 2: Load tokenizer
     print("2 Loading tokenizer from JSON")
     t0 = time.time()
-    tok = SubwordTokenizerRust.load(TOKENIZER_JSON_PATH)
+    tok = SubwordTokenizerRust.load(Path.TOKENIZER_JSON_PATH)
     t1 = time.time()
     print(f"Done in {t1 - t0:.2f} seconds. Vocabulary size: {len(tok.id_to_token)}")
 
@@ -74,12 +66,12 @@ def main():
     print(f"Done in {t1 - t0:.2f} seconds. Total tokens: {len(ids):,}")
 
     # Create processed directory if it does not exist
-    os.makedirs(PROCESSED_DIR, exist_ok=True)
+    os.makedirs(Path.PROCESSED_DIR, exist_ok=True)
 
     # 5: Split dataset into train/validation
     print("4 Splitting dataset into training and validation sets")
     t0 = time.time()
-    split_idx = int(len(ids) * TRAIN_SPLIT)
+    split_idx = int(len(ids) * DatasetConfig.TRAIN_SPLIT)
     train_ids = ids[:split_idx]
     val_ids   = ids[split_idx:]
     t1 = time.time()
@@ -89,12 +81,12 @@ def main():
     # 5: Save binary token ID files
     print("5 Saving binary token ID files")
     t0 = time.time()
-    train_ids.tofile(TRAIN_BIN)
-    val_ids.tofile(VAL_BIN)
+    train_ids.tofile(Path.TRAIN_BIN)
+    val_ids.tofile(Path.VAL_BIN)
     t1 = time.time()
     print(f"Done in {t1 - t0:.2f} seconds.")
-    print(f"Saved train.bin → {TRAIN_BIN}")
-    print(f"Saved val.bin   → {VAL_BIN}")
+    print(f"Saved train.bin → {Path.TRAIN_BIN}")
+    print(f"Saved val.bin   → {Path.VAL_BIN}")
 
     # 6: Save tokenizer metadata 
     print("6 Saving tokenizer metadata")
@@ -105,10 +97,10 @@ def main():
         "id_to_token": tok.id_to_token,
         "special_tokens": tok.special_tokens,
     }
-    with open(META_PATH, "wb") as f:
+    with open(Path.META_PATH, "wb") as f:
         pickle.dump(meta, f)
     t1 = time.time()
-    print(f"Done in {t1 - t0:.2f} seconds. Metadata saved to: {META_PATH}")
+    print(f"Done in {t1 - t0:.2f} seconds. Metadata saved to: {Path.META_PATH}")
 
     # Total preprocessing time
     end_total = time.time()
